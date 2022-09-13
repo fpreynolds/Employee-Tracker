@@ -1,7 +1,7 @@
 // imports
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const inquirer = require('inquirer');
-const cTable = require('console.table');
+const consoleTable = require('console.table');
 require('dotenv').config();
 
 // db connection
@@ -53,35 +53,35 @@ const promptUser = () => {
     .then ((answers) => {
         const { choices } = answers; 
 
-      if (choices === "View departments") {
+      if (choices === "View all departments") {
         showDepartments();
       }
 
-      if (choices === "View roles") {
+      if (choices === "View all roles") {
         showRoles();
       }
 
-      if (choices === "View employees") {
+      if (choices === "View all employees") {
         showEmployees();
       }
 
-      if (choices === "Add department") {
+      if (choices === "Add a department") {
         addDepartment();
       }
 
-      if (choices === "Add role") {
+      if (choices === "Add a role") {
         addRole();
       }
 
-      if (choices === "Add employee") {
+      if (choices === "Add an employee") {
         addEmployee();
       }
 
-      if (choices === "Update employee role") {
+      if (choices === "Update an employee role") {
         updateEmployee();
       }
 
-      if (choices === "Update employee manager") {
+      if (choices === "Update an employee manager") {
         updateManager();
       }
 
@@ -89,15 +89,15 @@ const promptUser = () => {
         employeeDepartment();
       }
 
-      if (choices === "Delete department") {
+      if (choices === "Delete a department") {
         deleteDepartment();
       }
 
-      if (choices === "Delete role") {
+      if (choices === "Delete a role") {
         deleteRole();
       }
 
-      if (choices === "Delete employee") {
+      if (choices === "Delete an employee") {
         deleteEmployee();
       }
 
@@ -116,7 +116,7 @@ showDepartments = () => {
     console.log('Showing departments\n');
   const sql = `SELECT department.id AS id, department.name AS department FROM department`; 
 
-  connection.promise().query(sql, (err, rows) => {
+  connection.query(sql, (err, rows) => {
     if (err) throw err;
     console.table(rows);
     promptUser();
@@ -129,7 +129,7 @@ showRoles = () => {
     const sql = `SELECT role.id, role.title, department.name AS department
                  FROM role
                  INNER JOIN department ON role.department_id = department.id`;   
-    connection.promise().query(sql, (err, rows) => {
+    connection.query(sql, (err, rows) => {
       if (err) throw err; 
       console.table(rows); 
       promptUser();
@@ -150,7 +150,7 @@ showEmployees = () => {
                       LEFT JOIN role ON employee.role_id = role.id
                       LEFT JOIN department ON role.department_id = department.id
                       LEFT JOIN employee manager ON employee.manager_id = manager.id`;
-  connection.promise().query(sql, (err, rows) => {
+  connection.query(sql, (err, rows) => {
     if (err) throw err; 
     console.table(rows);
     promptUser();
@@ -220,7 +220,7 @@ addRole = () => {
         const params = [answer.role, answer.salary];  
         // select dept from dept table
         const roleSql = `SELECT name, id FROM department`;  
-        connection.promise().query(roleSql, (err, data) => {
+        connection.query(roleSql, (err, data) => {
           if (err) throw err;      
           const dept = data.map(({ name, id }) => ({ name: name, value: id }));  
           inquirer.prompt([
@@ -280,7 +280,7 @@ addEmployee = () => {
       const params = [answer.fistName, answer.lastName]  
       // grab roles from roles table
       const roleSql = `SELECT role.id, role.title FROM role`;    
-      connection.promise().query(roleSql, (err, data) => {
+      connection.query(roleSql, (err, data) => {
         if (err) throw err;         
         const roles = data.map(({ id, title }) => ({ name: title, value: id }));  
         inquirer.prompt([
@@ -295,7 +295,7 @@ addEmployee = () => {
                 const role = roleChoice.role;
                 params.push(role);  
                 const managerSql = `SELECT * FROM employee`;  
-                connection.promise().query(managerSql, (err, data) => {
+                connection.query(managerSql, (err, data) => {
                   if (err) throw err;  
                   const managers = data.map(({ id, first_name, last_name }) => ({ name: first_name + " "+ last_name, value: id }));
                   inquirer.prompt([
@@ -327,7 +327,7 @@ addEmployee = () => {
 updateEmployee = () => {
     // get employees from employee table 
     const employeeSql = `SELECT * FROM employee`;  
-    connection.promise().query(employeeSql, (err, data) => {
+    connection.query(employeeSql, (err, data) => {
       if (err) throw err;  
     const employees = data.map(({ id, first_name, last_name }) => ({ name: first_name + " "+ last_name, value: id }));  
       inquirer.prompt([
@@ -343,7 +343,7 @@ updateEmployee = () => {
           const params = []; 
           params.push(employee); 
           const roleSql = `SELECT * FROM role`;  
-          connection.promise().query(roleSql, (err, data) => {
+          connection.query(roleSql, (err, data) => {
             if (err) throw err; 
             const roles = data.map(({ id, title }) => ({ name: title, value: id }));           
               inquirer.prompt([
@@ -376,7 +376,7 @@ updateEmployee = () => {
 updateManager = () => {
     // employees from emp table 
     const employeeSql = `SELECT * FROM employee`;
-    connection.promise().query(employeeSql, (err, data) => {
+    connection.query(employeeSql, (err, data) => {
       if (err) throw err;
     const employees = data.map(({ id, first_name, last_name }) => ({ name: first_name + " "+ last_name, value: id }));
       inquirer.prompt([
@@ -392,7 +392,7 @@ updateManager = () => {
           const params = []; 
           params.push(employee);
           const managerSql = `SELECT * FROM employee`;
-            connection.promise().query(managerSql, (err, data) => {
+            connection.query(managerSql, (err, data) => {
               if (err) throw err; 
             const managers = data.map(({ id, first_name, last_name }) => ({ name: first_name + " "+ last_name, value: id }));
              
@@ -431,7 +431,7 @@ employeeDepartment = () => {
                  FROM employee 
                  LEFT JOIN role ON employee.role_id = role.id 
                  LEFT JOIN department ON role.department_id = department.id`; 
-    connection.promise().query(sql, (err, rows) => {
+    connection.query(sql, (err, rows) => {
       if (err) throw err; 
       console.table(rows); 
       promptUser();
@@ -441,7 +441,7 @@ employeeDepartment = () => {
 // delete dept
 deleteDepartment = () => {
     const deptSql = `SELECT * FROM department`;   
-    connection.promise().query(deptSql, (err, data) => {
+    connection.query(deptSql, (err, data) => {
       if (err) throw err;   
       const dept = data.map(({ name, id }) => ({ name: name, value: id }));  
       inquirer.prompt([
@@ -467,7 +467,7 @@ deleteDepartment = () => {
 // delete role
 deleteRole = () => {
     const roleSql = `SELECT * FROM role`;  
-    connection.promise().query(roleSql, (err, data) => {
+    connection.query(roleSql, (err, data) => {
       if (err) throw err;   
       const role = data.map(({ title, id }) => ({ name: title, value: id }));  
       inquirer.prompt([
@@ -494,7 +494,7 @@ deleteRole = () => {
 deleteEmployee = () => {
     // get employees from employee table 
     const employeeSql = `SELECT * FROM employee`; 
-    connection.promise().query(employeeSql, (err, data) => {
+    connection.query(employeeSql, (err, data) => {
       if (err) throw err;   
     const employees = data.map(({ id, first_name, last_name }) => ({ name: first_name + " "+ last_name, value: id }));  
       inquirer.prompt([
@@ -525,7 +525,7 @@ viewBudget = () => {
                         SUM(salary) AS budget
                  FROM  role  
                  JOIN department ON role.department_id = department.id GROUP BY  department_id`;
-    connection.promise().query(sql, (err, rows) => {
+    connection.query(sql, (err, rows) => {
       if (err) throw err; 
       console.table(rows);
       promptUser(); 
