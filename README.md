@@ -38,3 +38,5 @@ This application is tested by use only.
 Direct all questions to Github [https://github.com/fpreynolds] or Email frankpiercereynolds95@gmail.com
 
 ## Tutorial Video
+
+https://drive.google.com/file/d/1C7PY6HY0rndnvOcsaGWyVW3ukcXqwqs6/view
